@@ -257,8 +257,20 @@ int main() {
 		generateOffspring(population, offspring);
 
 		if (PRINT) {
+		  //todo: fix shitty tabs
+		  int avgFitness = 0;
+		  int mostFit;
 			fprintf(stdout, "Generation %d:\n", gen+1);
 			printPopulation(offspring);
+			for (int i=0; i < POPULATION_SIZE; i++) {
+			  avgFitness += offspring[i].fitness;
+			  if (offspring[i].fitness > mostFit) {
+			    mostFit = offspring[i].fitness;
+			  }
+			}
+			avgFitness /= POPULATION_SIZE;
+			fprintf(stdout, "Average fitness: %d\n", avgFitness);
+			fprintf(stdout, "Fittest individual: %d\n", mostFit);
 		}
 
 		// Make offspring the new population (kill off the old people)
