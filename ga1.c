@@ -104,6 +104,9 @@ void mutate(chromosome* chrom) {
 			} else {
 				chrom->alleleSet[i] = 1;
 			}
+			if (INFO) {
+				printf("Mutated allele %d\n", i);
+			}
 		}
 	}
 
@@ -137,11 +140,16 @@ void generateRouletteTable(chromosome* population, float* probTable) {
 	for (i=0; i < POPULATION_SIZE; i++) {
 	    totalFitness += getFitness(population[i]);
 	}
+	printf("Fitness sum: %d\n", totalFitness);
 
 	float previousProbability = 0.0;
+	float probability;
 	for (i=0; i < POPULATION_SIZE; i++) {
-	      probTable[i] = previousProbability + population[i].fitness / totalFitness;
-	      previousProbability += probTable[i];
+		probability = (float)population[i].fitness / (float)totalFitness;
+	    probTable[i] = previousProbability + probability;
+	    previousProbability += probability;
+	    printf("Probability %f added to probTable[%d]. This individual with fitness %d/%d has a %f chance]\n",
+	    		previousProbability, i, population[i].fitness, totalFitness, probability); //debug
 	}
 }
 
@@ -153,14 +161,17 @@ void generateRouletteTable(chromosome* population, float* probTable) {
  */
 int rouletteSelect(chromosome* population, float* probTable) {
 
-    float r = drand48();
+    float r = (float)drand48();
     int i;
 
+    if (DEBUG) {
+    	printf("Roulette roll: %f\n", r);
+    }
     // Find the bin which the random number fits
     for (i=0; i < POPULATION_SIZE; i++) {
-	if (r < probTable[i]) {
-	    return i;
-	}
+    	if (r < probTable[i]) {
+    		return i;
+    	}
     }
     // In case of floating point roundoff error
     return POPULATION_SIZE - 1;
@@ -177,12 +188,14 @@ void generateOffspring(chromosome* population, chromosome* offspring) {
 	float probTable[POPULATION_SIZE];
 	float r;
 
+	// Get probability table for weighted selection
 	generateRouletteTable(population, probTable);
 
 	// Generate offspring for next generation
 	int i;
 	for (i=0; i < POPULATION_SIZE / 2; i++) {
 
+		int j;
 		// Select two parents to produce offspring (with replacement)
 		copyAlleleSet(&population[rouletteSelect(population, probTable)], &child1);
 		copyAlleleSet(&population[rouletteSelect(population, probTable)], &child2);
@@ -194,15 +207,14 @@ void generateOffspring(chromosome* population, chromosome* offspring) {
 			// Randomly select a locus
 			locus = rand() % CHROM_SIZE;
 
-			if (INFO) {
+			if (DEBUG) {
 				printf("Mating: [");
-				int i;
-				for (i=0; i < CHROM_SIZE; i++) {
-					printf("%d", child1.alleleSet[i]);
+				for (j=0; j < CHROM_SIZE; j++) {
+					printf("%d", child1.alleleSet[j]);
 				}
 				printf("], [");
-				for (i=0; i < CHROM_SIZE; i++) {
-					printf("%d", child2.alleleSet[i]);
+				for (j=0; j < CHROM_SIZE; j++) {
+					printf("%d", child2.alleleSet[j]);
 				}
 				printf("] from locus %d\n", locus);
 			}
@@ -210,18 +222,27 @@ void generateOffspring(chromosome* population, chromosome* offspring) {
 			// Swap the alleles of the parents
 			crossover(&child1, &child2, locus);
 
-			if (INFO) {
+			if (DEBUG) {
 				printf("Children: [");
-				int i;
-				for (i=0; i < CHROM_SIZE; i++) {
-					printf("%d", child1.alleleSet[i]);
+				for (j=0; j < CHROM_SIZE; j++) {
+					printf("%d", child1.alleleSet[j]);
 				}
 				printf("], [");
-				for (i=0; i < CHROM_SIZE; i++) {
-					printf("%d", child2.alleleSet[i]);
+				for (j=0; j < CHROM_SIZE; j++) {
+					printf("%d", child2.alleleSet[j]);
 				}
 				printf("]\n");
 			}
+		} else if (DEBUG) {
+			printf("Duplicating: [");
+			for (j=0; j < CHROM_SIZE; j++) {
+				printf("%d", child1.alleleSet[j]);
+			}
+			printf("], [");
+			for (j=0; j < CHROM_SIZE; j++) {
+				printf("%d", child2.alleleSet[j]);
+			}
+			printf("]\n");
 		}
 		// MUTATE THE CHILDREN!!!
 		mutate(&child1);
@@ -230,28 +251,56 @@ void generateOffspring(chromosome* population, chromosome* offspring) {
 		// Add the new children to the offspring group
 		offspring[i] = child1;
 		offspring[i + POPULATION_SIZE / 2] = child2;
+		if (DEBUG && 0) {
+			printf("Added children to indices [%d], [%d]: [", i, i+POPULATION_SIZE/2);
+			for (j=0; j < CHROM_SIZE; j++) {
+				printf("%d", child1.alleleSet[j]);
+			}
+			printf("], [");
+			for (j=0; j < CHROM_SIZE; j++) {
+				printf("%d", child2.alleleSet[j]);
+			}
+			printf("]\n");
+		}
 	}
 }
 
 int main() {
 
 	srand(time(NULL));
+	srand48(time(NULL));
 
 	chromosome population[POPULATION_SIZE];
 	chromosome offspring[POPULATION_SIZE];
 
 	// Generate population randomly
 	resetPopulation(population);
-	if (PRINT) {
-		fprintf(stdout, "Generation 0:\n");
-		printPopulation(population);
-	}
 
 	// Iterate through generations
 	int gen;
 	for (gen=0; gen < GENERATIONS; gen++) {
+
 		// Compute the fitness of all chromosomes
 		getPopulationFitness(population);
+
+		if (PRINT) {
+			int avgFitness = 0;
+			int mostFit = 0;
+			int i;
+
+			fprintf(stdout, "\nGeneration %d:\n", gen);
+			printPopulation(population);
+			for (i=0; i < POPULATION_SIZE; i++) {
+				avgFitness += population[i].fitness;
+				printf("Fitness[%d]: %d\n", i, population[i].fitness);
+				if (population[i].fitness > mostFit) {
+					mostFit = population[i].fitness;
+				}
+			}
+			avgFitness /= POPULATION_SIZE;
+			fprintf(stdout, "Average fitness: %d\n", avgFitness);
+			fprintf(stdout, "Fittest individual: %d\n", mostFit);
+		}
 
 
 
@@ -261,25 +310,26 @@ int main() {
 		// Compute the new chromosome's fitness
 		getPopulationFitness(offspring);
 
-		if (PRINT) {
-			int avgFitness = 0;
-			int mostFit;
-			int i;
-			fprintf(stdout, "Generation %d:\n", gen+1);
-			printPopulation(offspring);
-			for (i=0; i < POPULATION_SIZE; i++) {
-				avgFitness += offspring[i].fitness;
-				printf("Fitness[%d]: %d\n", i, offspring[i].fitness);
-				if (offspring[i].fitness > mostFit) {
-					mostFit = offspring[i].fitness;
-				}
-			}
-			avgFitness /= POPULATION_SIZE;
-			fprintf(stdout, "Average fitness: %d\n", avgFitness);
-			fprintf(stdout, "Fittest individual: %d\n", mostFit);
-		}
-
 		// Make offspring the new population (kill off the old people)
 		copyAlleleSet(offspring, population);
+	}
+
+	if (PRINT) {
+		int avgFitness = 0;
+		int mostFit = 0;
+		int i;
+
+		fprintf(stdout, "\nFinal Generation:\n");
+		printPopulation(offspring);
+		for (i=0; i < POPULATION_SIZE; i++) {
+			avgFitness += offspring[i].fitness;
+			printf("Fitness[%d]: %d\n", i, offspring[i].fitness);
+			if (offspring[i].fitness > mostFit) {
+				mostFit = offspring[i].fitness;
+			}
+		}
+		avgFitness /= POPULATION_SIZE;
+		fprintf(stdout, "Average fitness: %d\n", avgFitness);
+		fprintf(stdout, "Fittest individual: %d\n", mostFit);
 	}
 }

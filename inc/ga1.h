@@ -2,7 +2,7 @@
  * Program configurations
  */
 // This value must be even
-#define POPULATION_SIZE 6
+#define POPULATION_SIZE 100
 // Number of alleles in a chromosome
 #define CHROM_SIZE 20
 #define GENERATIONS 20
@@ -17,7 +17,7 @@
 // Print every member of every generation
 #define PRINT 1
 // Print debug info
-#define DEBUG 0
+#define DEBUG 1
 // Print information about mating in each generation
 #define INFO  1
 
