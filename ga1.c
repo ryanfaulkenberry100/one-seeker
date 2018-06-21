@@ -130,15 +130,18 @@ void crossover(chromosome* chrom1, chromosome* chrom2, int locus) {
 void generateRouletteTable(chromosome* population, float* probTable) {
 
 	int totalFitness = 0;
+	
+	float probability;
 	int i;
 	// Get sum of every individual's fitness
 	for (i=0; i < POPULATION_SIZE; i++) {
-		totalFitness += getFitness(population[i]);
+	    totalFitness += getFitness(population[i]);
 	}
 
 	int previousProbability = 0;
 	for (i=0; i < POPULATION_SIZE; i++) {
-
+	      probTable[i] = previousProbability + population[i].fitness / totalFitness;
+	      previousProbability += probTable[i];
 	}
 }
 
@@ -150,8 +153,17 @@ void generateRouletteTable(chromosome* population, float* probTable) {
  */
 int rouletteSelect(chromosome* population, float* probTable) {
 
+    float r = drand48()
+    int i;
 
-
+    // Find the bin which the random number fits
+    for (i=0; i < POPULATION_SIZE; i++) {
+	if (r < probTable[i]) {
+	    return i;
+	}
+    }
+    // In case of floating point roundoff error
+    return POPULATION_SIZE - 1;
 }
 
 /**
