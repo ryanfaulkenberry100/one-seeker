@@ -3,7 +3,7 @@
  * efficient weighted selection. These functions are currently unused.
  */
 
-#include "ga1.h"
+#include "inc/config.h"
 
 /**
  * Given probability and alias tables, selects a member of the given

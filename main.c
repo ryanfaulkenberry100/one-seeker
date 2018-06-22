@@ -1,7 +1,33 @@
+/**
+ * This program is a simple genetic algorithm in which the population is composed
+ * of strings with characters 1 and 0, and structured such that members with more
+ * 1's are more likely to reproduce.
+ *
+ * Definitions of lingo used in this program:
+ *
+ * A *chromosome* is a single member of the population. A chromosome is defined as
+ * an array of alleles.
+ *
+ * An *allele* is an integer with value 0 or 1
+ *
+ * A *locus* is an index at which a certain allele can be found on a chromosome,
+ * starting from index 0 (e.g. for the chromosome [0001], locus 3 is the fourth
+ * allele with value 1.)
+ *
+ * A chromosome's *fitness* is defined as the number of alleles it contains which
+ * have value 1.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "ga1.h"
+
+#include "inc/config.h"
+
+typedef struct chromosome_ {
+	int alleleSet[CHROM_SIZE];
+	int fitness;
+} chromosome;
 
 void printFloatArray(float* array, int len) {
 
@@ -50,14 +76,6 @@ int getFitness(chromosome chrom) {
 	int i;
 	for (i=0; i < CHROM_SIZE; i++) {
 		ret += chrom.alleleSet[i];
-	}
-	if (STOP_ON_ALL_ONES) {
-		// If we found an individual with perfect fitness, terminate
-		if (ret == CHROM_SIZE) {
-			printf("PERFECT SPECIMEN CREATED\n");
-			exit(0);
-		}
-	}
 	return ret;
 }
 
@@ -109,7 +127,6 @@ void mutate(chromosome* chrom) {
 			}
 		}
 	}
-
 }
 
 /**
@@ -304,9 +321,9 @@ int main() {
 
 			int i;
 			printPopulation(population);
-				for (i=0; i < POPULATION_SIZE; i++) {
-					printf("Fitness[%d]: %d\n", i, population[i].fitness);
-				}
+			for (i=0; i < POPULATION_SIZE; i++) {
+				printf("Fitness[%d]: %d\n", i, population[i].fitness);
+			}
 		}
 
 
@@ -321,6 +338,12 @@ int main() {
 		int i;
 		for (i=0; i < POPULATION_SIZE; i++) {
 		    copyAlleleSet(offspring + i, population + i);
+
+			if (STOP_ON_ALL_ONES && population[i].fitness == CHROM_SIZE) {
+				// If we found an individual with perfect fitness, terminate
+				printf("PERFECT SPECIMEN CREATED\n");
+				exit(0);
+			}
 		}
 	}
 
@@ -343,8 +366,8 @@ int main() {
 
 		int i;
 		printPopulation(population);
-			for (i=0; i < POPULATION_SIZE; i++) {
-				printf("Fitness[%d]: %d\n", i, population[i].fitness);
-			}
+		for (i=0; i < POPULATION_SIZE; i++) {
+			printf("Fitness[%d]: %d\n", i, population[i].fitness);
+		}
 	}
 }
