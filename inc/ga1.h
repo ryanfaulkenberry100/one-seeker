@@ -5,7 +5,7 @@
 #define POPULATION_SIZE 100
 // Number of alleles in a chromosome
 #define CHROM_SIZE 20
-#define GENERATIONS 20
+#define GENERATIONS 40
 #define CROSSOVER_RATE 0.7
 #define MUTATION_RATE 0.001
 // Terminates the program if an individual with perfect fitness is born
@@ -17,8 +17,8 @@
 // Print every member of every generation
 #define PRINT 1
 // Print debug info
-#define DEBUG 1
-// Print information about mating in each generation
+#define DEBUG 0
+// Print information about the population of each generation
 #define INFO  1
 
 typedef struct chromosome_ {

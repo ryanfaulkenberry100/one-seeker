@@ -148,8 +148,8 @@ void generateRouletteTable(chromosome* population, float* probTable) {
 		probability = (float)population[i].fitness / (float)totalFitness;
 	    probTable[i] = previousProbability + probability;
 	    previousProbability += probability;
-	    printf("Probability %f added to probTable[%d]. This individual with fitness %d/%d has a %f chance]\n",
-	    		previousProbability, i, population[i].fitness, totalFitness, probability); //debug
+	    printf("Probability %f added to probTable[%d]. This individual has fitness %d/%d\n",
+	    		previousProbability, i, population[i].fitness, totalFitness); //debug
 	}
 }
 
@@ -251,14 +251,14 @@ void generateOffspring(chromosome* population, chromosome* offspring) {
 		// Add the new children to the offspring group
 		offspring[i] = child1;
 		offspring[i + POPULATION_SIZE / 2] = child2;
-		if (DEBUG && 0) {
+		if (DEBUG) {
 			printf("Added children to indices [%d], [%d]: [", i, i+POPULATION_SIZE/2);
 			for (j=0; j < CHROM_SIZE; j++) {
-				printf("%d", child1.alleleSet[j]);
+				printf("%d", offspring[i].alleleSet[j]);
 			}
 			printf("], [");
 			for (j=0; j < CHROM_SIZE; j++) {
-				printf("%d", child2.alleleSet[j]);
+				printf("%d", offspring[i + POPULATION_SIZE / 2].alleleSet[j]);
 			}
 			printf("]\n");
 		}
@@ -311,7 +311,10 @@ int main() {
 		getPopulationFitness(offspring);
 
 		// Make offspring the new population (kill off the old people)
-		copyAlleleSet(offspring, population);
+		int i;
+		for (i=0; i < POPULATION_SIZE; i++) {
+		    copyAlleleSet(offspring + i, population + i);
+		}
 	}
 
 	if (PRINT) {
