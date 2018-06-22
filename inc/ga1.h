@@ -16,10 +16,11 @@
  */
 // Print every member of every generation
 #define PRINT 1
+// Print information about the population of each generation
+#define INFO  0
 // Print debug info
 #define DEBUG 0
-// Print information about the population of each generation
-#define INFO  1
+
 
 typedef struct chromosome_ {
 	int alleleSet[CHROM_SIZE];

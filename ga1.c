@@ -148,8 +148,10 @@ void generateRouletteTable(chromosome* population, float* probTable) {
 		probability = (float)population[i].fitness / (float)totalFitness;
 	    probTable[i] = previousProbability + probability;
 	    previousProbability += probability;
-	    printf("Probability %f added to probTable[%d]. This individual has fitness %d/%d\n",
-	    		previousProbability, i, population[i].fitness, totalFitness); //debug
+	    if (DEBUG) {
+	    	printf("Probability %f added to probTable[%d]. This individual has fitness %d/%d\n",
+	    				previousProbability, i, population[i].fitness, totalFitness);
+	    }
 	}
 }
 
@@ -284,15 +286,12 @@ int main() {
 		getPopulationFitness(population);
 
 		if (PRINT) {
+			int i;
 			int avgFitness = 0;
 			int mostFit = 0;
-			int i;
-
 			fprintf(stdout, "\nGeneration %d:\n", gen);
-			printPopulation(population);
 			for (i=0; i < POPULATION_SIZE; i++) {
 				avgFitness += population[i].fitness;
-				printf("Fitness[%d]: %d\n", i, population[i].fitness);
 				if (population[i].fitness > mostFit) {
 					mostFit = population[i].fitness;
 				}
@@ -300,6 +299,14 @@ int main() {
 			avgFitness /= POPULATION_SIZE;
 			fprintf(stdout, "Average fitness: %d\n", avgFitness);
 			fprintf(stdout, "Fittest individual: %d\n", mostFit);
+		}
+		if (INFO) {
+
+			int i;
+			printPopulation(population);
+				for (i=0; i < POPULATION_SIZE; i++) {
+					printf("Fitness[%d]: %d\n", i, population[i].fitness);
+				}
 		}
 
 
@@ -318,21 +325,26 @@ int main() {
 	}
 
 	if (PRINT) {
+		int i;
 		int avgFitness = 0;
 		int mostFit = 0;
-		int i;
-
 		fprintf(stdout, "\nFinal Generation:\n");
-		printPopulation(offspring);
 		for (i=0; i < POPULATION_SIZE; i++) {
-			avgFitness += offspring[i].fitness;
-			printf("Fitness[%d]: %d\n", i, offspring[i].fitness);
-			if (offspring[i].fitness > mostFit) {
-				mostFit = offspring[i].fitness;
+			avgFitness += population[i].fitness;
+			if (population[i].fitness > mostFit) {
+				mostFit = population[i].fitness;
 			}
 		}
 		avgFitness /= POPULATION_SIZE;
 		fprintf(stdout, "Average fitness: %d\n", avgFitness);
 		fprintf(stdout, "Fittest individual: %d\n", mostFit);
+	}
+	if (INFO) {
+
+		int i;
+		printPopulation(population);
+			for (i=0; i < POPULATION_SIZE; i++) {
+				printf("Fitness[%d]: %d\n", i, population[i].fitness);
+			}
 	}
 }
