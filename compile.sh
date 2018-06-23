@@ -1,1 +1,1 @@
-gcc -Wall -I./inc ga1.c -o output
+gcc -Wall -I./inc main.c -o output

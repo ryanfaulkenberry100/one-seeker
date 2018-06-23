@@ -76,6 +76,7 @@ int getFitness(chromosome chrom) {
 	int i;
 	for (i=0; i < CHROM_SIZE; i++) {
 		ret += chrom.alleleSet[i];
+	}
 	return ret;
 }
 
@@ -337,13 +338,14 @@ int main() {
 		// Make offspring the new population (kill off the old people)
 		int i;
 		for (i=0; i < POPULATION_SIZE; i++) {
+		  
 		    copyAlleleSet(offspring + i, population + i);
 
-			if (STOP_ON_ALL_ONES && population[i].fitness == CHROM_SIZE) {
-				// If we found an individual with perfect fitness, terminate
-				printf("PERFECT SPECIMEN CREATED\n");
-				exit(0);
-			}
+		    if (STOP_ON_ALL_ONES && population[i].fitness == CHROM_SIZE) {
+			// If we found an individual with perfect fitness, terminate
+			printf("PERFECT SPECIMEN CREATED\n");
+			exit(0);
+		    }
 		}
 	}
 
@@ -370,4 +372,5 @@ int main() {
 			printf("Fitness[%d]: %d\n", i, population[i].fitness);
 		}
 	}
+	return 0;
 }
